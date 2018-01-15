@@ -3,9 +3,9 @@ pragma solidity ^0.4.18;
 contract Donations {
 
     address public owner; // Contract creator's address
+    address public contractsAddress; // Contract's address
     uint public fundingGoal = 1; // Funding goal value
     uint public durationInMinutes = 1; // Duration for each donation
-    //uint public amountRaised = 0; // Amount currently raised
     uint public deadline; // Donation stops at deadline
     bool public donationClosed = false;
     bool public fundingGoalReached = false;
@@ -29,6 +29,7 @@ contract Donations {
     */
     function Donations() public {
 		owner = msg.sender;
+		contractsAddress = this;
 		fundingGoal = fundingGoal * 1 ether;
 		deadline = now + (durationInMinutes * 1 minutes);
 	}
@@ -36,42 +37,42 @@ contract Donations {
     /*
     *   Donate to organization
     */
-	function sendDonation(address _to, uint _amount) public payable returns(bool success) {
+	function sendDonation(uint _amount) public payable returns(bool success) {
 	    require(!donationClosed);
-		if (balanceOf[msg.sender] < _amount) {
-            return false;
-        }
-		balanceOf[msg.sender] -= _amount;
-		//amountRaised += _amount;
-        _to.transfer(_amount);
-		Donate(msg.sender, _to, _amount);
-		return true;
+		if(balanceOf[msg.sender] < _amount) {
+    		balanceOf[msg.sender] -= _amount;
+            contractsAddress.transfer(_amount);
+    		Donate(msg.sender, owner, _amount);
+    		return true;
+		}
+		return false;
 	}
 	
 	/*
 	*   Check if goal is reached. Can only check after deadline = true
 	*/
-	function checkGoalReached() public returns(bool) {
-	    if(getBalance() >= fundingGoal || now >= deadline) {
+	function checkGoalReached() public payable returns(bool) {
+	    if (getBalance() >= fundingGoal || now >= deadline) {
 	        fundingGoalReached = true;
 	        donationClosed = true;
-	        transferDonation(owner, getBalance());
-	        SendRaisedDonation(owner, getBalance());
+	        transferDonation(getBalance());
+	        SendRaisedDonation(contractsAddress, getBalance());
 	        return true;
 	    }
 	    return false;
 	}
 	
-	function transferDonation(address _to, uint _amount) public {
-	    _to.transfer(_amount);
+	function transferDonation(uint _amount) public payable {
+	    owner.transfer(_amount);
 	}
     
     /*
     *   Check contract's balance
     */
     function getBalance() public view returns(uint) {
-		return this.balance;
+		return contractsAddress.balance;
 	}
+
 
     /*
     *   Delete this smart contract from blockchain

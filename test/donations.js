@@ -1,9 +1,10 @@
 var Donations = artifacts.require("Donations");
 
-contract('Donations', function(balances) {
-    it("Should run", function() {
+contract('Donations', function() {
+    it("Should work", function() {
         return Donations.deployed().then(function(instance) {
-            return instance.getBalance.call(accounts[0]);
+            var donation = instance;
+            return donation.getBalance();
         });
     });
 });
