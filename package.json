@@ -1,0 +1,25 @@
+{
+  "name": "donations",
+  "version": "1.0.0",
+  "description": "Smart contract built on Ethereum that allows to donate ether to organizations",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Dziubutkus/Donations-Smart-Contract.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Dziubutkus/Donations-Smart-Contract/issues"
+  },
+  "homepage": "https://github.com/Dziubutkus/Donations-Smart-Contract#readme",
+  "dependencies": {
+    "web3": "github:ethereum/web3.js"
+  }
+}
