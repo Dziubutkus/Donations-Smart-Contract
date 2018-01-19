@@ -39,7 +39,7 @@ contract Donations {
     */
 	function sendDonation(uint _amount) public payable returns(bool success) {
 	    require(!donationClosed);
-		if(balanceOf[msg.sender] < _amount) {
+		if (balanceOf[msg.sender] < _amount) {
     		balanceOf[msg.sender] -= _amount;
             contractsAddress.transfer(_amount);
     		Donate(msg.sender, owner, _amount);
