@@ -25,9 +25,10 @@
                 </form>
             </div>
         </div>
-
+        <img src="images/loader.gif" alt="Loading" id="loader">
         <div class="row" style="padding-top: 20px;">
             <div class="col-sm">
+                
                 <h3 id="amountDonated"></h3>
                 <div class="progress">
                     <div class="progress-bar progress-bar-striped" role="progressbar" style="width: 10%" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"></div>
@@ -49,21 +50,33 @@
 
        var donationsContract = web3.eth.contract([{"constant":false,"inputs":[],"name":"checkGoalReached","outputs":[{"name":"","type":"bool"}],"payable":true,"stateMutability":"payable","type":"function"},{"constant":true,"inputs":[],"name":"getBalance","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"deadline","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[],"name":"kill","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_amount","type":"uint256"}],"name":"sendDonation","outputs":[{"name":"success","type":"bool"}],"payable":true,"stateMutability":"payable","type":"function"},{"constant":false,"inputs":[{"name":"_amount","type":"uint256"}],"name":"transferDonation","outputs":[],"payable":true,"stateMutability":"payable","type":"function"},{"constant":true,"inputs":[],"name":"fundingGoal","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"donationClosed","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"contractsAddress","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"durationInMinutes","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"fundingGoalReached","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"name":"donationTo","type":"address"},{"indexed":false,"name":"totalAmountRaised","type":"uint256"}],"name":"SendRaisedDonation","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"sender","type":"address"},{"indexed":false,"name":"receiver","type":"address"},{"indexed":false,"name":"amountDonated","type":"uint256"}],"name":"Donate","type":"event"}]);
 
-       var donations = donationsContract.at('0x8cdaf0cd259887258bc13a92c0a6da92698644c0');
-       console.log(donations);
-
-       donations.getBalance(function(error, result) {
-           if(!error) {
-               $("#amountDonated").html(result + '');
-               console.log(result + '');
-           } else {
-               console.log(error + '');
-           }
-       });
+       var donations = donationsContract.at('0xb529f14aa8096f943177c09ca294ad66d2e08b1f');
        
-       $("#submit").click(function() {
-            donations.sendDonation.sendTransaction(document.getElementById('ethAmount').value, {from: web3.eth.coinbase, value:web3.toWei('1','ether')});
-       });
+       var donationEvent = donations.Donate();
+
+        donationEvent.watch(function(error, result) {
+            if(!error) {
+                $("loader").hide();
+                $("#amountDonated").html(result);
+            } else {
+                $("loader").hide();
+                console.log(error + '');
+            }
+        }); 
+
+        donations.getBalance(function(error, result) {
+            if(!error) {
+                $("#amountDonated").html(result + '');
+                console.log(result + '');
+            } else {
+                console.log(error + '');
+            }
+        });
+       
+        $("#submit").click(function() {
+            donations.sendDonation.sendTransaction(document.getElementById('ethAmount').value, {from: web3.eth.coinbase, value:web3.toWei(document.getElementById('ethAmount').value,'ether')});
+            $("loader").show();
+        });
        
     </script>
 
