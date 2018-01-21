@@ -12,10 +12,18 @@
 
 </head>
 <body>
+
+    <div class="jumbotron jumbotron-fluid">
+        <div class="container">
+            <h1 class="display-4">Donate Ethereum</h1>
+            <p class="lead"></p>
+        </div>
+    </div>
+
     <div class="container">
 
         <div class="row">
-            <div class="col-sm">
+            <div class="col">
                 <form>
                     <div class="form-group">
                         <label for="ethAmount">Amount (ethereum)</label>
@@ -27,7 +35,7 @@
         </div>
         <img src="images/loader.gif" alt="Loading" id="loader">
         <div class="row" style="padding-top: 20px;">
-            <div class="col-sm">
+            <div class="col">
                 
                 <h3 id="amountDonated"></h3>
                 <div class="progress">
@@ -50,7 +58,7 @@
 
        var donationsContract = web3.eth.contract([{"constant":false,"inputs":[],"name":"checkGoalReached","outputs":[{"name":"","type":"bool"}],"payable":true,"stateMutability":"payable","type":"function"},{"constant":true,"inputs":[],"name":"getBalance","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"deadline","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[],"name":"kill","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_amount","type":"uint256"}],"name":"sendDonation","outputs":[{"name":"success","type":"bool"}],"payable":true,"stateMutability":"payable","type":"function"},{"constant":false,"inputs":[{"name":"_amount","type":"uint256"}],"name":"transferDonation","outputs":[],"payable":true,"stateMutability":"payable","type":"function"},{"constant":true,"inputs":[],"name":"fundingGoal","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"donationClosed","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"contractsAddress","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"durationInMinutes","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"fundingGoalReached","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"name":"donationTo","type":"address"},{"indexed":false,"name":"totalAmountRaised","type":"uint256"}],"name":"SendRaisedDonation","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"sender","type":"address"},{"indexed":false,"name":"receiver","type":"address"},{"indexed":false,"name":"amountDonated","type":"uint256"}],"name":"Donate","type":"event"}]);
 
-       var donations = donationsContract.at('0xb529f14aa8096f943177c09ca294ad66d2e08b1f');
+       var donations = donationsContract.at('0x5034f49b27353cedc562b49ea91c7438ea351d36');
        
        var donationEvent = donations.Donate();
 
@@ -74,8 +82,14 @@
         });
        
         $("#submit").click(function() {
-            donations.sendDonation.sendTransaction(document.getElementById('ethAmount').value, {from: web3.eth.coinbase, value:web3.toWei(document.getElementById('ethAmount').value,'ether')});
             $("loader").show();
+            donations.sendDonation.sendTransaction(document.getElementById('ethAmount').value, {from: web3.eth.coinbase, value:web3.toWei(document.getElementById('ethAmount').value,'ether')}, (err, res) => {
+                if(err) {
+                    $("#loader").hide();
+                    console.log('lox');
+                }
+            });
+            
         });
        
     </script>
