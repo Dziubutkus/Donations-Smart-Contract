@@ -10,143 +10,94 @@ import "./ConvertLib.sol";
 
 contract Donations {
 
-    address public owner; // Contract creator's address
-    address public contractsAddress; // Contract's address
-    address public organizationAddress; // Address to donate to
-    uint public fundingGoal = 1; // Funding goal value
-    uint public durationInMinutes = 1; // Duration for each donation
-    uint public deadline; // Donation stops at deadline
-    bool public donationClosed = true;
-    bool public fundingGoalReached = true;
+    address public owner; // Contract owner's address
+    address public organizationAddress; // Organization's address
+    uint public donationGoal; // Amount of ether to raise
+    uint public durationInMinutes; // Length of donation event
+    uint public deadline; // Deadline of donation event
+    uint public raisedAmount; // Amount of ether raised
+    
+    enum State { Active, Inactive}
+    State state;
     
     mapping (address => uint) balanceOf;
-
-    event SendRaisedDonation(address donationTo, uint totalAmountRaised);
-    event Donate(address sender, address receiver, uint256 amountDonated);
-    event ChangeDonation(address beneficiary, uint fundingGoal, uint durationInMinutes);
     
-    /** 
-    *   Things to pay attention to:
-    *   Add states
-    *   Fix modifiers
-    *   Fix security (require(), ifs())
-    */
-
-    // Give access to functions after deadline
-    modifier afterDeadline {
-        if (now >= deadline) {
-            _;
-        }
-    }
-
-    // Give access to functions during the donation event
-    modifier duringDeadline {
-        if (now < deadline) {
-            _;
-        }
-    }
-    // Make functions only accessable by the contract's owner
-    modifier onlyOwner { 
-        require(msg.sender == owner);  
-        _; 
-    }
+    event StartDonationEvent(address organizationAddress, uint donationGoal, uint durationInMinutes);
+    event DonateEvent(address donator, address organizationAddress, uint amountDonated);
     
-    /*
-    *   Default constructor
-    */
-    function Donations() public {
-		owner = msg.sender;
-		contractsAddress = this;
-		//fundingGoal = fundingGoal * 1 ether;
-		//deadline = now + (durationInMinutes * 1 minutes);
-	}
-    
-    /*
-    *   Create a donation event.
-    *   @params: 
-    *   _organization       - organization's address
-    *   _fundingGoal        - set the intended amount of ether to raise
-    *   _durationInMinutes  - the duration of donation event in minutes
-    */
-    function changeDonation(address _organization, uint _fundingGoal, uint _durationInMinutes) onlyOwner afterDeadline public {
-        // Security
+    // Allow access to owner only
+    modifier onlyOwner() {
         require(msg.sender == owner);
-        require(donationClosed == true);
-        require(fundingGoalReached == true);
-        // Set variables
-        organizationAddress = _organization;
-        fundingGoal = _fundingGoal * 1 ether;
-        durationInMinutes = _durationInMinutes;
-        // Set deadline
-        deadline = now + (durationInMinutes * 1 minutes);
-        // Set booleans
-        donationClosed = false;
-        fundingGoalReached = false;
+        _;
     }
-
+    
+    // Constructor, called only once
+    function Donations() public {
+        owner = msg.sender;
+        organizationAddress = this;
+        state = State.Inactive;
+    }
+    
+    // Prevent random funds from being sent to contract
+    function () public payable {
+        revert();
+    }
+    
     /*
-    *   Send donation to the pool
-    *   @params:
-    *   _amount - amount of ether to donate
+    *   startDonation()
+    *   change donation address, donation goal, and donation duration only after no other event is happening
     */
-	function sendDonation(uint _amount) public payable beforeDeadline returns(bool success) {
-	    require(!donationClosed);
-        require(_amount > 0);
-		if (balanceOf[msg.sender] < _amount) {
-    		balanceOf[msg.sender] -= _amount;
-            contractsAddress.transfer(_amount);
-    		Donate(msg.sender, owner, _amount);
+    function startDonation(address _organizationAddress, uint _donationGoal, uint _durationInMinutes) public onlyOwner {
+        require(state == State.Inactive); // Donation event must have ended
+        organizationAddress = _organizationAddress; // Set organization's address
+        donationGoal = (_donationGoal * 1 ether); // Set donation's goal
+        durationInMinutes = _durationInMinutes;
+        deadline = now + (durationInMinutes * 1 minutes); // Set donation's deadline
+        state = State.Active;
+        
+        StartDonationEvent(organizationAddress, donationGoal, durationInMinutes);
+    }
+    
+    /*
+    *   sendDonation()
+    *   send donation directly to organization's address
+    */
+    function sendDonation() public payable returns(bool success) {
+        require(msg.sender != owner);
+        require(state == State.Active);
+        require(msg.value > 0);
+        if (balanceOf[msg.sender] <= msg.value) {
+    		balanceOf[msg.sender] -= msg.value;
+            organizationAddress.transfer(msg.value);
+            raisedAmount += msg.value;
+    		DonateEvent(msg.sender, organizationAddress, msg.value);
     		return true;
 		}
 		return false;
-	}
-	
-	/*
-	*   Check if goal is reached. Can only check after deadline = true
-    *   If goal is reached, call transferDonation() to send raised ether to organization
-	*/
-	function checkGoalReached() public payable afterDeadline returns(bool) {
-	    if (getBalance() >= fundingGoal || now >= deadline) {
-            // Stop donation proccess
-	        fundingGoalReached = true;
-	        donationClosed = true;
-            // Transfer raised ether to organization
-	        transferDonation(getBalance());
-	        SendRaisedDonation(contractsAddress, getBalance());
-	        return true;
-	    }
-	    return false;
-	}
-	
-    /*
-    *   Transfer raised donation to organization after deadline
-    *   @params:
-    *   _amount - amount of ether to send to organization. (_amount comes from getBalance())
-    */
-	function transferDonation(uint _amount) public payable afterDeadline {
-	    owner.transfer(_amount);
-	}
+    }
     
     /*
-    *   Get contract's balance in wei
+    *   checkDonationEnded()
+    *   check if donation event has ended 
+    *   allow access only during active event, as there is no need to check status when it is ended
     */
-    function getBalance() public view returns(uint) {
-		return contractsAddress.balance;
-	}
-
+    function checkDonationEnded() public {
+        require(state == State.Active); // Donation even must be active
+        if(now >= deadline)
+        {
+            state = State.Inactive;   
+            raisedAmount = 0;
+        }
+    }
+    
     /*
-    *   Get contract's balance in ether with 2 decimal points
-    */
-    function getBalanceInEth() public view returns(uint) {
-		return ConvertLib.convert(getBalance(), 2);
-	}
-
-    /*
-    *   Delete this smart contract from blockchain
+    *   kill()
+    *   delete this smart contract from blockchain
     */
     function kill() public onlyOwner {
         if (msg.sender == owner) {
             selfdestruct(owner);
         }
     }
+    
 }
