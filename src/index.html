@@ -43,53 +43,73 @@
                 </div>
             </div>
         </div>
+        <br>
+        <div class="row">
+            <div class="col">
+                <h3 id="donationState"></h3>
+                <form>
+                    <div class="form-group">
+                      <label for="organizationAddress">Organization's Ethereum Address</label>
+                      <input type="text" class="form-control" id="organizationAddress" placeholder="Enter Organization's Ethereum Address">
+                    </div>
+                    <div class="form-group">
+                      <label for="donationGoal">Donation Goal</label>
+                      <input type="number" class="form-control" id="donationGoal" placeholder="Donation Goal">
+                    </div>
+                    <div class="form-group">
+                        <label for="durationInMinutes">Donation Event Length</label>
+                        <input type="number" class="form-control" id="durationInMinutes" placeholder="Donation Event Length in Minutes">
+                      </div>
+                    <button type="startDonation" class="btn btn-primary" id="startDonation">Submit</button>
+                  </form>
+            </div>
+        </div>
+
     </div>
 
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
 
     <script>
-       if (typeof web3 !== 'undefined') {
-           web3 = new Web3(web3.currentProvider);
-       } else {
-           web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
-       }
+      // Is there is an injected web3 instance?
+        if (typeof web3 !== 'undefined') {
+            //App.web3Provider = web3.currentProvider;
+            web3 = new Web3(web3.currentProvider);
+        } else {
+            // If no injected web3 instance is detected, fallback to Ganache.
+            //App.web3Provider = new web3.providers.HttpProvider('http://127.0.0.1:7545');
+            //web3 = new Web3(App.web3Provider);
+            web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:8545"));
+        }
 
        web3.eth.defaultAccount = web3.eth.accounts[0];
 
-       var donationsContract = web3.eth.contract([{"constant":false,"inputs":[],"name":"checkGoalReached","outputs":[{"name":"","type":"bool"}],"payable":true,"stateMutability":"payable","type":"function"},{"constant":true,"inputs":[],"name":"getBalance","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"deadline","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[],"name":"kill","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_amount","type":"uint256"}],"name":"sendDonation","outputs":[{"name":"success","type":"bool"}],"payable":true,"stateMutability":"payable","type":"function"},{"constant":false,"inputs":[{"name":"_amount","type":"uint256"}],"name":"transferDonation","outputs":[],"payable":true,"stateMutability":"payable","type":"function"},{"constant":true,"inputs":[],"name":"fundingGoal","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"donationClosed","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"contractsAddress","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"durationInMinutes","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"fundingGoalReached","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"name":"donationTo","type":"address"},{"indexed":false,"name":"totalAmountRaised","type":"uint256"}],"name":"SendRaisedDonation","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"sender","type":"address"},{"indexed":false,"name":"receiver","type":"address"},{"indexed":false,"name":"amountDonated","type":"uint256"}],"name":"Donate","type":"event"}]);
+       var donationsContract = web3.eth.contract([{"constant":true,"inputs":[],"name":"organizationAddress","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"deadline","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_organizationAddress","type":"address"},{"name":"_donationGoal","type":"uint256"},{"name":"_durationInMinutes","type":"uint256"}],"name":"startDonation","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[],"name":"kill","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[],"name":"checkDonationEnded","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"donationGoal","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[],"name":"sendDonation","outputs":[{"name":"success","type":"bool"}],"payable":true,"stateMutability":"payable","type":"function"},{"constant":true,"inputs":[],"name":"raisedAmount","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"durationInMinutes","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"payable":true,"stateMutability":"payable","type":"fallback"},{"anonymous":false,"inputs":[{"indexed":false,"name":"organizationAddress","type":"address"},{"indexed":false,"name":"donationGoal","type":"uint256"},{"indexed":false,"name":"durationInMinutes","type":"uint256"}],"name":"StartDonationEvent","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"donator","type":"address"},{"indexed":false,"name":"organizationAddress","type":"address"},{"indexed":false,"name":"amountDonated","type":"uint256"}],"name":"DonateEvent","type":"event"}]);
 
-       var donations = donationsContract.at('0x5034f49b27353cedc562b49ea91c7438ea351d36');
+       var donations = donationsContract.at('0xa4392264a2d8c998901d10c154c91725b1bf0158');
        
-       var donationEvent = donations.Donate();
-
+       var donationEvent = donations.StartDonationEvent();
+       
+       /*
         donationEvent.watch(function(error, result) {
             if(!error) {
                 $("loader").hide();
-                $("#amountDonated").html(result);
+                $("#donationState").html("Active");
             } else {
                 $("loader").hide();
-                console.log(error + '');
+                $("#donationState").html("Inactive");
+                console.log("Event error: " + error);
             }
         }); 
-
-        donations.getBalance(function(error, result) {
-            if(!error) {
-                $("#amountDonated").html(result + '');
-                console.log(result + '');
-            } else {
-                console.log(error + '');
-            }
+        */
+        
+        $("#startDonation").click(function() {
+            console.log("Start Donation Button Pressed.");
+            donations.startDonation($("#organizationAddress").val(), $("#donationGoal").val(), $("#durationInMinutes").val(), {from: "0x627306090abab3a6e1400e9345bc60c78a8bef57", gas: 200000});
         });
-       
+
         $("#submit").click(function() {
             $("loader").show();
-            donations.sendDonation.sendTransaction(document.getElementById('ethAmount').value, {from: web3.eth.coinbase, value:web3.toWei(document.getElementById('ethAmount').value,'ether')}, (err, res) => {
-                if(err) {
-                    $("#loader").hide();
-                    console.log('lox');
-                }
-            });
-            
+            donations.sendDonation({from: web3.eth.coinbase, value:web3.toWei(($("#ethAmount").val()),'ether')});
         });
        
     </script>

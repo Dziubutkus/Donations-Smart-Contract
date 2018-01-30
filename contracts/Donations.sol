@@ -63,7 +63,7 @@ contract Donations {
     *   send donation directly to organization's address
     */
     function sendDonation() public payable returns(bool success) {
-        require(msg.sender != owner);
+        //require(msg.sender != owner);
         require(state == State.Active);
         require(msg.value > 0);
         if (balanceOf[msg.sender] <= msg.value) {
