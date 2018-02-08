@@ -1,4 +1,13 @@
+body {
+    padding-top: 55px;
+}
 #loader {
     width: 100px;
     display: none;
 }
+
+#progressBar {
+    margin: 20px;
+    width: 200px;
+    height: 200px;
+  }

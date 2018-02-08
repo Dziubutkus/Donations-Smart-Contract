@@ -34,8 +34,6 @@ contract Donations {
     // Constructor, called only once
     function Donations() public {
         owner = msg.sender;
-        organizationAddress = this;
-        state = State.Inactive;
     }
     
     // Prevent random funds from being sent to contract
@@ -66,11 +64,11 @@ contract Donations {
         //require(msg.sender != owner);
         require(state == State.Active);
         require(msg.value > 0);
-        if (balanceOf[msg.sender] <= msg.value) {
-    		balanceOf[msg.sender] -= msg.value;
-            organizationAddress.transfer(msg.value);
-            raisedAmount += msg.value;
-    		DonateEvent(msg.sender, organizationAddress, msg.value);
+        uint amount = msg.value;
+        if (balanceOf[msg.sender] <= amount) {
+            organizationAddress.transfer(amount);
+            raisedAmount += amount;
+    		DonateEvent(msg.sender, organizationAddress, amount);
     		return true;
 		}
 		return false;
@@ -83,8 +81,7 @@ contract Donations {
     */
     function checkDonationEnded() public {
         require(state == State.Active); // Donation even must be active
-        if(now >= deadline)
-        {
+        if(now >= deadline) {
             state = State.Inactive;   
             raisedAmount = 0;
         }
@@ -101,3 +98,4 @@ contract Donations {
     }
     
 }
+

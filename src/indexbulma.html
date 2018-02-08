@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.6.2/css/bulma.min.css">
+    <script defer src="https://use.fontawesome.com/releases/v5.0.0/js/all.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/mainBulma.css">
+    <link rel="stylesheet" type="text/css" href="css/spacing-helpers.css">
+    <script src="../node_modules/web3/dist/web3.min.js"></script>
+
+</head>
+<body>
+
+    <section class="hero is-info is-medium is-bold">
+        <!-- Hero head: will stick at the top -->
+        <div class="hero-head">
+          <nav class="navbar">
+            <div class="container">
+              <div class="navbar-brand">
+                <a class="navbar-item">
+                  <img src="https://bulma.io/images/bulma-type-white.png" alt="Logo">
+                </a>
+                <span class="navbar-burger burger" data-target="navbarMenuHeroA">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </span>
+              </div>
+              <div id="navbarMenuHeroA" class="navbar-menu">
+                <div class="navbar-end">
+                  <a class="navbar-item is-active">
+                    Home
+                  </a>
+                  <a class="navbar-item">
+                    Donate
+                  </a>
+                  <a class="navbar-item">
+                    FAQ
+                  </a>
+                  <a class="navbar-item">
+                    Change Charity
+                  </a>
+                  <span class="navbar-item">
+                    <a class="button is-primary is-inverted">
+                      <span class="icon">
+                        <i class="fab fa-github"></i>
+                      </span>
+                      <span>Github</span>
+                    </a>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </nav>
+        </div>
+      
+        <!-- Hero content: will be in the middle -->
+        <div class="hero-body">
+          <div class="container has-text-centered">
+            <h1 class="title">
+                Donate to Charities on Blockchain
+            </h1>
+            <div class="m-b-10">
+            <h2 class="subtitle">
+                A Change in the World Starts with You
+            </h2>
+            </div>
+            <div class="m-t-30 subtitle">
+              <h2>Currently Raised: 0.6/1 ETH</h2>
+            </div>
+            <progress class="progress is-success m-t-30" value="60" max="100">60%</progress>
+          </div>
+        </div>
+      </section>
+
+      <section class="hero is-medium is-bold">
+        <div class="hero-body">
+          <div class="container has-text-centered">
+            <h1 class="title">
+              Pencils of Promise
+            </h1>
+            <h2 class="subtitle">
+                100% of online donations go towards educating children
+            </h2>
+            <div class="field has-addons has-addons-centered">
+              <p class="control">
+                <a class="button is-static">
+                  Ξ
+                </a>
+              </p>
+              <p class="control">
+                <input class="input" id="ethAmount" type="text" placeholder="Amount of Ether">
+              </p>
+              <p class="control">
+                <a class="button is-primary" id="submit">
+                  Transfer
+                </a>
+              </p>
+            </div>
+            <div>
+              <h2 class="subtitle">Or send directly to this address: </h2> <p id="getOrganizationAddress"></p>
+            </div>
+        </div>
+      </section>
+      <section class="hero is-light is-large">
+        <div class="hero-body">
+          <div class="container has-text-centered">
+            <h1 class="title">
+              Frequently Asked Questions
+            </h1>
+            <h2 class="subtitle">
+              Primary subtitle
+            </h2>
+          </div>
+        </div>
+      </section>
+
+      <section class="hero is-dark is-medium">
+        <div class="hero-body">
+          <div class="container has-text-centered">
+            <h1 class="title">
+              Change Donation Address
+            </h1>
+            <div class="box">
+            <div class="field">
+              <label class="label">Organization's Address</label>
+              <div class="control">
+                <input class="input is-narrow" id="organizationAddress" type="text" placeholder="Ethereum Address Starts with 0x">
+              </div>
+            </div>
+            
+            <div class="field">
+              <label class="label">Donation Goal</label>
+              <div class="control">
+                <input class="input" id="donationGoal" type="text" placeholder="Donation Goal in Ethereum">
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="label">Duration</label>
+              <div class="control">
+                <input class="input" id="durationInMinutes" type="text" placeholder="Duration in Minutes">
+              </div>
+            </div>
+            <a class="button is-light" id="startDonation">Submit</a>
+          </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="hero is-light is-medium">
+        <div class="hero-body">
+          <div class="container has-text-centered">
+            <h1 class="title">
+              ACTIVATE NUKES
+            </h1>
+            <h2 class="subtitle">
+              Please don't
+            </h2>
+            <a class="button is-danger" id="checkDonation">DO IT</a>
+          </div>
+        </div>
+      </section>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+
+    <script>
+      // Is there is an injected web3 instance?
+        if (typeof web3 !== 'undefined') {
+            //App.web3Provider = web3.currentProvider;
+            web3 = new Web3(web3.currentProvider);
+        } else {
+            // If no injected web3 instance is detected, fallback to Ganache.
+            //App.web3Provider = new web3.providers.HttpProvider('http://127.0.0.1:7545');
+            //web3 = new Web3(App.web3Provider);
+            web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:8545"));
+        }
+
+       web3.eth.defaultAccount = web3.eth.accounts[0];
+
+       var donationsContract = web3.eth.contract([{"constant":true,"inputs":[],"name":"organizationAddress","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"deadline","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_organizationAddress","type":"address"},{"name":"_donationGoal","type":"uint256"},{"name":"_durationInMinutes","type":"uint256"}],"name":"startDonation","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[],"name":"kill","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[],"name":"checkDonationEnded","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"donationGoal","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[],"name":"sendDonation","outputs":[{"name":"success","type":"bool"}],"payable":true,"stateMutability":"payable","type":"function"},{"constant":true,"inputs":[],"name":"raisedAmount","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"durationInMinutes","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"payable":true,"stateMutability":"payable","type":"fallback"},{"anonymous":false,"inputs":[{"indexed":false,"name":"organizationAddress","type":"address"},{"indexed":false,"name":"donationGoal","type":"uint256"},{"indexed":false,"name":"durationInMinutes","type":"uint256"}],"name":"StartDonationEvent","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"donator","type":"address"},{"indexed":false,"name":"organizationAddress","type":"address"},{"indexed":false,"name":"amountDonated","type":"uint256"}],"name":"DonateEvent","type":"event"}]);
+
+       var donations = donationsContract.at('0x8cdaf0cd259887258bc13a92c0a6da92698644c0');
+       
+       var donationEvent = donations.StartDonationEvent();
+       
+       /*
+        donationEvent.watch(function(error, result) {
+            if(!error) {
+                $("loader").hide();
+                $("#donationState").html("Active");
+            } else {
+                $("loader").hide();
+                $("#donationState").html("Inactive");
+                console.log("Event error: " + error);
+            }
+        }); 
+        */
+        
+        $("#startDonation").click(function() {
+            console.log("Start Donation Button Pressed.");
+            donations.startDonation($("#organizationAddress").val(), $("#donationGoal").val(), $("#durationInMinutes").val(), {from: "0x627306090abab3a6e1400e9345bc60c78a8bef57", gas: 200000});
+            $("#getOrganizationAddress").html(donations.organizationAddress());
+        });
+
+        $("#submit").click(function() {
+            $("loader").show();
+            donations.sendDonation({from: web3.eth.coinbase, value:web3.toWei(($("#ethAmount").val()),'ether')});
+        });
+
+        $("#checkDonation").click(function() {
+          console.log("Check Donation Button Pressed");
+          donations.checkDonationEnded();
+        });
+       
+    </script>
+
+</body>
+</html>
