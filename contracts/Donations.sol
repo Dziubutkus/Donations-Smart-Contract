@@ -1,11 +1,9 @@
 pragma solidity ^0.4.18;
 
-import "./ConvertLib.sol";
-
 /*
 *   Author:         Dziugas Butkus
-*   Description:    DAPP that lets contract's owner to create donation events. Everyone can donate ether to one pool until deadline.
-*                   After deadline, raised funds are transfered to organization and contract's owner has to create a new donation event.
+*   Description:    Lets users donate to charities. Funds are transfered directly to charity's address.
+*                   Owner creates donation events, duration and goals in ether.
 */
 
 contract Donations {
@@ -24,6 +22,8 @@ contract Donations {
     
     event StartDonationEvent(address organizationAddress, uint donationGoal, uint durationInMinutes);
     event DonateEvent(address donator, address organizationAddress, uint amountDonated);
+    event CancelDonationEvent(address organizationAddress, uint raisedAmount);
+    event FromContractToOwnerEvent(address owner, uint contractsBalance);
     
     // Allow access to owner only
     modifier onlyOwner() {
@@ -88,6 +88,42 @@ contract Donations {
     }
     
     /*
+    *   cancelDonation()
+    *   Let owner cancel donation event. Useful if there is a typo in organization address, duration.
+    *   When users donate, funds are automatically transfered to organization address, so owner can't
+    *   steal.
+    */
+    function cancelDonation() public onlyOwner {
+        require(state == State.Active);
+        deadline += durationInMinutes;
+        state = State.Inactive;
+        CancelDonationEvent(organizationAddress, raisedAmount);
+        raisedAmount = 0;
+    }
+
+    /*
+    *   fromContractToOwner()
+    *   If for some reason ether is sent to contract's address, owner can gete the funds back.
+    *   Future plans: keep track of transactions and send back if they end up in contract's address
+    *   to prevent owner from stealing.
+    */
+    function fromContractToOwner() public onlyOwner {
+        uint contractsBalance = this.balance;
+        owner.transfer(contractsBalance);
+        FromContractToOwnerEvent(owner, contractsBalance);
+    }
+
+    /*
+    *   getRaisedAmount()
+    *   Return amount of ether raised during current event, to keep track of statistics
+    *   ***SHOULD USE ALREADY EXISTING EVENTS INSTEAD OF THIS FUNCTION TO SAVE GAS***
+    */
+    function getRaisedAmount() public onlyOwner returns(uint) {
+        require(state == State.Active);
+        return raisedAmount;
+    }
+
+    /*
     *   kill()
     *   delete this smart contract from blockchain
     */
@@ -98,4 +134,3 @@ contract Donations {
     }
     
 }
-
